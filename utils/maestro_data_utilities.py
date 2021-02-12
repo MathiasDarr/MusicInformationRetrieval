@@ -17,7 +17,7 @@ def process_wav_midi_pair(wav, midi):
     """
     y, sr = load_wav_file(wav)
     annotation = extract_notes(midi)
-    cqt = perform_cqt_transform(y, sr, 252, 36, 'A0')
+    cqt = perform_cqt_transform(y, sr)
     binary_annotation_matrix = generate_annotation_matrices(annotation, cqt.shape[0])
     return cqt, binary_annotation_matrix
 
@@ -27,14 +27,8 @@ def load_wav_file(wav):
     return y, sr
 
 
-
-def load_cqt_and_annotation(fileid):
-    pass
-
-
-
 def generate_midi_wav_file_pairs_from_folder(path):
-    count = 0
+
     file_pairs = []
 
     files = os.listdir("{}".format(path))
@@ -45,14 +39,16 @@ def generate_midi_wav_file_pairs_from_folder(path):
     return file_pairs
 
 
-def perform_cqt_transform(y,sr, nbins, bins_per_octave, low_note):
-    cqt_raw = librosa.core.cqt(y, sr=sr, n_bins=nbins, bins_per_octave=bins_per_octave, fmin=librosa.note_to_hz(low_note), norm=1)
+def perform_cqt_transform(y,sr):
+    cqt_raw = librosa.core.cqt(y, sr=sr, n_bins=84, bins_per_octave=12, fmin=librosa.note_to_hz('A0'),norm=1)
+    magnitude, phase = librosa.magphase(cqt_raw)
     magphase_cqt = librosa.magphase(cqt_raw)
     cqt = magphase_cqt[0].T
     return cqt
 
 
-def generate_midi_wav_file_pairs(path):
+def generate_midi_wav_file_pairs():
+    path='data/maestro-v3.0.0'
     folders =['2013','2011','2006','2017','2015','2008', '2009', '2014', '2018', '2004']
     count = 0
     file_pairs = []
@@ -126,6 +122,3 @@ def remove_note(notes_set, note_value):
         if note[0] == note_value:
             notes_set.remove(note)
             return note
-
-
-
